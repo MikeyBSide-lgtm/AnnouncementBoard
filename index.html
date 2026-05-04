@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Announcement Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #c8a96e;
+    --gold-dim: #8a6f3f;
+    --gold-glow: rgba(200, 169, 110, 0.12);
+    --bg: #0c0c0e;
+    --bg-card: #111115;
+    --text: #f0ece3;
+    --text-muted: #7a756a;
+    --text-dim: #4a4640;
+    --border: rgba(200, 169, 110, 0.2);
+    --dur: 0.85s;
+  }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+
+  body {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    user-select: none;
+  }
+
+  /* ════════════ HEADER ════════════ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 40px 12px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(200,169,110,0.06) 0%, transparent 100%);
+    flex-shrink: 0;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 40px; right: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+  .board-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 2vw, 28px);
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+  .board-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+  .clock-block { text-align: right; }
+  #clock-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(22px, 2.4vw, 36px);
+    letter-spacing: 0.06em;
+    color: var(--text);
+    line-height: 1;
+  }
+  #clock-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* ════════════ ANNOUNCEMENT STRIP ════════════ */
+  #announce-strip {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  #announce-strip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: 0.3;
+  }
+  #announce-stage {
+    display: grid;
+    grid-template-areas: "stack";
+    align-items: center;
+    padding: 14px 0 0;
+  }
+  .ann-card {
+    grid-area: stack;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--dur) ease, transform var(--dur) ease;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .ann-card.active  { opacity: 1; transform: translateY(0); pointer-events: auto; visibility: visible; }
+  .ann-card.exit    { opacity: 0; transform: translateY(-8px); transition: opacity calc(var(--dur)*0.6) ease, transform calc(var(--dur)*0.6) ease; visibility: visible; }
+
+  .ann-cat {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ann-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; align-self: center; }
+  .ann-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(16px, 1.6vw, 22px);
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .ann-headline em { font-style: italic; color: var(--gold); }
+  .ann-body { font-size: clamp(12px, 1vw, 14px); font-weight: 300; color: var(--text-muted); line-height: 1.5; }
+  .ann-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.07em;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
+    padding-left: 52px;
+  }
+  .ann-meta-sep { color: var(--gold-dim); }
+
+  #strip-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0 10px;
+    border-top: 1px solid rgba(200,169,110,0.08);
+    margin-top: 10px;
+  }
+  .s-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    flex-shrink: 0;
+  }
+  .s-dot.active { background: var(--gold); transform: scale(1.5); }
+  #strip-pbar-wrap { flex: 1; height: 1px; background: var(--text-dim); max-width: 200px; overflow: hidden; }
+  #strip-pbar { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); width: 0%; transition: width linear; }
+  #strip-counter { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); margin-left: auto; }
+
+  /* ════════════ VIDEO SECTION ════════════ */
+  #video-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #video-title-bar {
+    padding: 9px 40px 8px;
+    background: var(--bg);
+    border-bottom: 1px solid rgba(200,169,110,0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    min-height: 40px;
+  }
+  #vid-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--gold-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #vid-title-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; }
+  #vid-current-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(15px, 1.5vw, 20px);
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.3;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #vid-current-title.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── YouTube container ── */
+  #yt-container {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    background: #000;
+  }
+
+  /*
+   * The iframe is created directly in HTML so it renders immediately,
+   * independent of the JS API loading. The JS API attaches on top
+   * afterward for title detection only.
+   */
+  #yt-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* Corner accents */
+  .corner { position: fixed; width: 36px; height: 36px; pointer-events: none; opacity: 0.25; }
+  .corner-tl { top: 12px; left: 12px; border-top: 1px solid var(--gold); border-left: 1px solid var(--gold); }
+  .corner-tr { top: 12px; right: 12px; border-top: 1px solid var(--gold); border-right: 1px solid var(--gold); }
+  .corner-bl { bottom: 12px; left: 12px; border-bottom: 1px solid var(--gold); border-left: 1px solid var(--gold); }
+  .corner-br { bottom: 12px; right: 12px; border-bottom: 1px solid var(--gold); border-right: 1px solid var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="board-title" id="board-title">Announcements</div>
+    <div class="board-subtitle" id="board-subtitle">— Live Board —</div>
+  </div>
+  <div class="clock-block">
+    <div id="clock-time">00:00</div>
+    <div id="clock-date">Loading...</div>
+  </div>
+</header>
+
+<!-- ANNOUNCEMENT STRIP -->
+<div id="announce-strip">
+  <div id="announce-stage"></div>
+  <div id="strip-footer">
+    <div id="strip-dots" style="display:flex;gap:8px;align-items:center;"></div>
+    <div id="strip-pbar-wrap"><div id="strip-pbar"></div></div>
+    <div id="strip-counter">1 / 1</div>
+  </div>
+</div>
+
+<!-- VIDEO SECTION -->
+<div id="video-section">
+  <div id="video-title-bar">
+    <span id="vid-label">NOW PLAYING</span>
+    <div id="vid-title-divider"></div>
+    <span id="vid-current-title"></span>
+  </div>
+  <div id="yt-container">
+    <!--
+      ┌─────────────────────────────────────────────────────────────────────┐
+      │  IMPORTANT — DO NOT replace this URL with a youtube.com/playlist    │
+      │  link copied from the browser address bar. That URL is the YouTube  │
+      │  website page and CANNOT be embedded (X-Frame-Options forbids it).  │
+      │                                                                     │
+      │  To use a different playlist:                                       │
+      │   1. Go to YouTube → Share → Embed (or grab the playlist ID).       │
+      │   2. Replace ONLY the value after `list=` below.                    │
+      │   3. The path must stay as `/embed/videoseries` — that's the only   │
+      │      YouTube endpoint allowed inside an iframe.                     │
+      │                                                                     │
+      │  Why the parameters:                                                │
+      │   • autoplay=1 + mute=1 — browsers block autoplay WITH sound, so    │
+      │     mute=1 is required for autoplay to actually fire. Don't drop    │
+      │     it unless you accept somebody clicking play once per reload.    │
+      │   • playsinline=1 — keeps it from hijacking fullscreen on iOS.      │
+      │   • enablejsapi=1 — lets the title-detection JS attach.             │
+      │   • rel=0 — fewer "related video" suggestions at end of clips.      │
+      └─────────────────────────────────────────────────────────────────────┘
+    -->
+    <iframe
+      id="yt-iframe"
+      src="https://www.youtube.com/embed/videoseries?list=PLFqQyTYesOJM_w9EI-ui0SsfUQqVHs0HD&autoplay=1&mute=1&playsinline=1&enablejsapi=1&rel=0"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CONFIGURATION — Edit everything in this block
+// ============================================================
+const CONFIG = {
+  boardTitle:    "Announcements - May 4th - 8th",
+  boardSubtitle: "— Live Board —",
+  intervalSecs:  8,
+
+  // To change the playlist, replace the ID in the <iframe> src above
+  // AND update this string to match — both must stay in sync.
+  youtubePlaylistId: "PLFqQyTYesOJM_w9EI-ui0SsfUQqVHs0HD&si=Yry2Iwoo9PGUvPw8D",
+
+  announcements: [
+    {
+      category: "RMA Department",
+      headline:  "PTO / Sick Days",
+      body:      "RMA team members currently Out Of Office or Scheduled for PTO.",
+      meta:      ["Monday 05/04: Matt's out sick"]
+    },
+    {
+      category: "Schedule",
+      headline:  "This week's <em>Agenda</em>",
+      body:      "Researching OCCT Alternatives and Tweaks.",
+      meta:      ["Communicate RMA testing changes to Ethan.", "Diving into more stringent RMA testing processes."]
+    },
+    {
+      category: "Reminder",
+      headline:  "Overtime ended Friday, May 1st.",
+      body:      "Build, shipping, and inventory teams are no longer on overtime this week.",
+      meta:      ["Pushing for Keagon back this week — we miss him.", "Drink poll coming to Slack — keep an eye out."]
+    },
+    {
+      category: "Notice",
+      headline:  "Feedback <em>Wanted</em>",
+      body:      "Missing anything? Let me know and I'll add it.",
+      meta:      ["Drop your input anytime."]
+    }
+  ]
+};
+// ============================================================
+
+// ── ANNOUNCEMENTS ──────────────────────────────────────────
+const INTERVAL_MS = CONFIG.intervalSecs * 1000;
+let cur = 0, annTimer = null;
+
+document.getElementById('board-title').textContent    = CONFIG.boardTitle;
+document.getElementById('board-subtitle').textContent = CONFIG.boardSubtitle;
+
+const annStage  = document.getElementById('announce-stage');
+const dotsEl    = document.getElementById('strip-dots');
+const counterEl = document.getElementById('strip-counter');
+const pbar      = document.getElementById('strip-pbar');
+
+CONFIG.announcements.forEach((ann, i) => {
+  const card = document.createElement('div');
+  card.className = 'ann-card' + (i === 0 ? ' active' : '');
+  card.id = 'ann-' + i;
+
+  const metaHtml = ann.meta && ann.meta.length
+    ? `<div class="ann-meta-row">${
+        ann.meta.map((m, idx) =>
+          (idx > 0 ? '<span class="ann-meta-sep">·</span>' : '') + `<span>${m}</span>`
+        ).join('')
+      }</div>`
+    : '';
+
+  card.innerHTML = `
+    <span class="ann-cat">${ann.category}</span>
+    <div class="ann-divider"></div>
+    <div>
+      <div class="ann-headline">${ann.headline}</div>
+      <div class="ann-body">${ann.body}</div>
+    </div>
+    ${metaHtml}
+  `;
+  annStage.appendChild(card);
+
+  const dot = document.createElement('div');
+  dot.className = 's-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(dot);
+});
+
+function startPbar() {
+  pbar.style.transition = 'none';
+  pbar.style.width = '0%';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    pbar.style.transition = `width ${INTERVAL_MS}ms linear`;
+    pbar.style.width = '100%';
+  }));
+}
+
+function goTo(index) {
+  clearInterval(annTimer);
+  const prev = document.getElementById('ann-' + cur);
+  dotsEl.children[cur].classList.remove('active');
+  prev.classList.remove('active');
+  prev.classList.add('exit');
+  setTimeout(() => prev.classList.remove('exit'), 600);
+  cur = index;
+  document.getElementById('ann-' + cur).classList.add('active');
+  dotsEl.children[cur].classList.add('active');
+  counterEl.textContent = `${cur + 1} / ${CONFIG.announcements.length}`;
+  startPbar();
+  annTimer = setInterval(() => goTo((cur + 1) % CONFIG.announcements.length), INTERVAL_MS);
+}
+
+counterEl.textContent = `1 / ${CONFIG.announcements.length}`;
+startPbar();
+annTimer = setInterval(() => goTo((cur + 1) % CONFIG.announcements.length), INTERVAL_MS);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo((cur + 1) % CONFIG.announcements.length);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  goTo((cur - 1 + CONFIG.announcements.length) % CONFIG.announcements.length);
+});
+
+// ── CLOCK ──────────────────────────────────────────────────
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock-time').textContent =
+    `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('clock-date').textContent = n.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  });
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ── YOUTUBE TITLE DETECTION (layered on top of the iframe) ──
+//
+// The video plays via the plain <iframe> above regardless of whether
+// this JS API section succeeds. This section only adds title display.
+//
+// Why this approach works from file://:
+//   The iframe src has no "origin" parameter, so YouTube doesn't
+//   validate against window.location.origin ("null" on file://).
+//   The JS API attaches to the existing iframe by element reference,
+//   which avoids the origin check that the playerVars constructor uses.
+
+const titleEl  = document.getElementById('vid-current-title');
+let ytPlayer   = null;
+let titlePoll  = null;
+
+function showTitle(text) {
+  if (!text || text === titleEl.dataset.last) return;
+  titleEl.dataset.last = text;
+  titleEl.classList.remove('visible');
+  setTimeout(() => {
+    titleEl.textContent = text;
+    titleEl.classList.add('visible');
+  }, 280);
+}
+
+// Load the YT IFrame API script
+const ytScript = document.createElement('script');
+ytScript.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(ytScript);
+
+window.onYouTubeIframeAPIReady = function () {
+  // Attach to the existing iframe element — no playerVars needed,
+  // no origin parameter, no chance of a config error.
+  try {
+    ytPlayer = new YT.Player('yt-iframe', {
+      events: {
+        onReady: function (e) {
+          // Attempt shuffle — may be ignored depending on YT account/playlist settings
+          try { e.target.setShuffle(true); } catch (_) {}
+          pollForTitle();
+        },
+        onStateChange: function (e) {
+          if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING) {
+            pollForTitle();
+          }
+        }
+      }
+    });
+  } catch (err) {
+    // API attachment failed — video still plays, just no title
+    showTitle('Now Playing');
+  }
+};
+
+function pollForTitle() {
+  clearInterval(titlePoll);
+  let tries = 0;
+  titlePoll = setInterval(() => {
+    try {
+      const data  = ytPlayer && ytPlayer.getVideoData && ytPlayer.getVideoData();
+      const title = data && data.title;
+      if (title) { showTitle(title); clearInterval(titlePoll); }
+    } catch (_) { clearInterval(titlePoll); }
+    if (++tries > 12) clearInterval(titlePoll);
+  }, 500);
+}
+</script>
+</body>
+</html>
