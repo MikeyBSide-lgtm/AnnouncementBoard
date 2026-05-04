@@ -5,20 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Announcement Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!--
+  Font: Geom Graphic (commercial, Dharma Type). If you have it installed
+  locally OR add an Adobe Fonts kit / self-hosted @font-face block, the
+  browser will use it. Otherwise it falls back to Orbitron from Google
+  Fonts — the closest free geometric-sci-fi match.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --gold: #c8a96e;
-    --gold-dim: #8a6f3f;
-    --gold-glow: rgba(200, 169, 110, 0.12);
-    --bg: #0c0c0e;
-    --bg-card: #111115;
-    --text: #f0ece3;
-    --text-muted: #7a756a;
-    --text-dim: #4a4640;
-    --border: rgba(200, 169, 110, 0.2);
+    /* Mike's palette */
+    --bg: #0A101D;                              /* Main background */
+    --bg-card: #33485B;                         /* Lighter background */
+    --text: #88D265;                            /* Primary text + accent */
+
+    /* Derived shades — kept under old variable names so the rest of
+       the CSS doesn't need to change. "gold" is now the green accent. */
+    --gold: #88D265;
+    --gold-dim: rgba(136, 210, 101, 0.55);
+    --gold-glow: rgba(136, 210, 101, 0.12);
+    --text-muted: rgba(136, 210, 101, 0.6);
+    --text-dim: rgba(136, 210, 101, 0.4);
+    --border: rgba(136, 210, 101, 0.25);
     --dur: 0.85s;
   }
 
@@ -30,7 +41,7 @@
     height: 100vh;
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     user-select: none;
   }
 
@@ -41,7 +52,7 @@
     justify-content: space-between;
     padding: 14px 40px 12px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(200,169,110,0.06) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(136,210,101,0.06) 0%, transparent 100%);
     flex-shrink: 0;
     position: relative;
   }
@@ -53,8 +64,20 @@
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
     opacity: 0.4;
   }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  #logo {
+    height: 44px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    display: block;
+  }
   .board-title {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: clamp(18px, 2vw, 28px);
     letter-spacing: 0.2em;
     color: var(--gold);
@@ -69,7 +92,7 @@
   }
   .clock-block { text-align: right; }
   #clock-time {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: clamp(22px, 2.4vw, 36px);
     letter-spacing: 0.06em;
     color: var(--text);
@@ -123,7 +146,7 @@
   .ann-card.exit    { opacity: 0; transform: translateY(-8px); transition: opacity calc(var(--dur)*0.6) ease, transform calc(var(--dur)*0.6) ease; visibility: visible; }
 
   .ann-cat {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: 12px;
     letter-spacing: 0.2em;
     color: var(--gold);
@@ -132,13 +155,13 @@
   }
   .ann-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; align-self: center; }
   .ann-headline {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: clamp(16px, 1.6vw, 22px);
     font-weight: 300;
     color: var(--text);
     line-height: 1.3;
   }
-  .ann-headline em { font-style: italic; color: var(--gold); }
+  .ann-headline em { font-style: italic; font-weight: 600; color: var(--gold); letter-spacing: 0.02em; }
   .ann-body { font-size: clamp(12px, 1vw, 14px); font-weight: 300; color: var(--text-muted); line-height: 1.5; }
   .ann-meta-row {
     display: flex;
@@ -159,7 +182,7 @@
     align-items: center;
     gap: 12px;
     padding: 8px 0 10px;
-    border-top: 1px solid rgba(200,169,110,0.08);
+    border-top: 1px solid rgba(136,210,101,0.08);
     margin-top: 10px;
   }
   .s-dot {
@@ -173,7 +196,7 @@
   .s-dot.active { background: var(--gold); transform: scale(1.5); }
   #strip-pbar-wrap { flex: 1; height: 1px; background: var(--text-dim); max-width: 200px; overflow: hidden; }
   #strip-pbar { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); width: 0%; transition: width linear; }
-  #strip-counter { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); margin-left: auto; }
+  #strip-counter { font-family: 'Geom Graphic', 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); margin-left: auto; }
 
   /* ════════════ VIDEO SECTION ════════════ */
   #video-section {
@@ -185,7 +208,7 @@
   #video-title-bar {
     padding: 9px 40px 8px;
     background: var(--bg);
-    border-bottom: 1px solid rgba(200,169,110,0.1);
+    border-bottom: 1px solid rgba(136,210,101,0.1);
     display: flex;
     align-items: center;
     gap: 14px;
@@ -193,7 +216,7 @@
     min-height: 40px;
   }
   #vid-label {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: 11px;
     letter-spacing: 0.22em;
     color: var(--gold-dim);
@@ -202,7 +225,7 @@
   }
   #vid-title-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; }
   #vid-current-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Geom Graphic', 'Orbitron', sans-serif;
     font-size: clamp(15px, 1.5vw, 20px);
     font-weight: 300;
     color: var(--text);
@@ -255,9 +278,18 @@
 
 <!-- HEADER -->
 <header>
-  <div>
-    <div class="board-title" id="board-title">Announcements</div>
-    <div class="board-subtitle" id="board-subtitle">— Live Board —</div>
+  <div class="header-left">
+    <!--
+      Drop a file named "logo.png" in the same folder as this index.html
+      and it will appear here. PNG with transparent background recommended.
+      If the file is missing, the slot disappears (no broken-image icon).
+      Want a different filename or SVG? Change the src below.
+    -->
+    <img id="logo" src="logo.png" alt="" onerror="this.style.display='none'">
+    <div>
+      <div class="board-title" id="board-title">Announcements</div>
+      <div class="board-subtitle" id="board-subtitle">— Live Board —</div>
+    </div>
   </div>
   <div class="clock-block">
     <div id="clock-time">00:00</div>
