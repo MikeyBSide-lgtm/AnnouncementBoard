@@ -22,7 +22,7 @@
     --bg-card: #33485B;                         /* Lighter background */
     --text: #88D265;                            /* Primary text + accent */
 
-    /* Derived shades — kept under old variable names so the rest of
+    /* Derived shades — keeping under old variable names so the rest of
        the CSS doesn't need to change. "gold" is now the green accent. */
     --gold: #88D265;
     --gold-dim: rgba(136, 210, 101, 0.55);
@@ -198,7 +198,7 @@
   #strip-pbar { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); width: 0%; transition: width linear; }
   #strip-counter { font-family: 'Geom Graphic', 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); margin-left: auto; }
 
-  /* ════════════ VIDEO SECTION ════════════ */
+  /* ════════════ VIDEO SECTION | Youtube Playlist ════════════ */
   #video-section {
     display: flex;
     flex-direction: column;
@@ -261,7 +261,7 @@
     display: block;
   }
 
-  /* Corner accents */
+  /* CSS Corner accents */
   .corner { position: fixed; width: 36px; height: 36px; pointer-events: none; opacity: 0.25; }
   .corner-tl { top: 12px; left: 12px; border-top: 1px solid var(--gold); border-left: 1px solid var(--gold); }
   .corner-tr { top: 12px; right: 12px; border-top: 1px solid var(--gold); border-right: 1px solid var(--gold); }
@@ -353,7 +353,7 @@
 //  CONFIGURATION — Edit everything in this block
 // ============================================================
 const CONFIG = {
-  boardTitle:    "Announcements - May 4th - 8th",
+  boardTitle:    "Announcements - May 11th - 15th",
   boardSubtitle: "— Live Board —",
   intervalSecs:  8,
 
@@ -366,25 +366,25 @@ const CONFIG = {
       category: "RMA Department",
       headline:  "PTO / Sick Days",
       body:      "RMA team members currently Out Of Office or Scheduled for PTO.",
-      meta:      ["Monday 05/04: Matt's out sick"]
+      meta:      ["NONE"]
     },
     {
       category: "Schedule",
       headline:  "This week's <em>Agenda</em>",
-      body:      "Researching OCCT Alternatives and Tweaks.",
-      meta:      ["Communicate RMA testing changes to Ethan.", "Diving into more stringent RMA testing processes."]
+      body:      "Keep tabs on Customer Service Discrepancies. OCCT Alternatives",
+      meta:      ["Message Mike any issues you may find."]
     },
     {
       category: "Reminder",
-      headline:  "Overtime ended Friday, May 1st.",
-      body:      "Build, shipping, and inventory teams are no longer on overtime this week.",
-      meta:      ["Pushing for Keagon back this week — we miss him.", "Drink poll coming to Slack — keep an eye out."]
+      headline:  "Please review your hours from this past week. This week is Pay week!$$$",
+      body:      "Mike is working through RMA turnaround times as well as tackling the amount of exchanges that come back.",
+      meta:      ["This is a collective effort between all department managers."]
     },
     {
       category: "Notice",
-      headline:  "Feedback <em>Wanted</em>",
-      body:      "Missing anything? Let me know and I'll add it.",
-      meta:      ["Drop your input anytime."]
+      headline:  "Drinks being <em>ordered</em>",
+      body:      "Mike is ordering beverages this week for the minifridge!",
+      meta:      ["Let me know if there are any missing anything you really want."]
     }
   ]
 };
